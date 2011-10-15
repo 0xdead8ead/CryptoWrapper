@@ -30,7 +30,7 @@ Python Cryptography Wrapper based on pyCrypto
 '''
 
 __author__ = 'Chase Schultz'
-__version__ = '0.1'
+__version__ = '0.2'
 
 import os
 import base64
