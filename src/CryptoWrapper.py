@@ -4,9 +4,10 @@
 
 Python Crypto Wrapper - By Chase Schultz
 
-Currently Supports: AES-256, RSA Public Key, RSA Signing
+Currently Supports: AES-256, RSA Public Key, RSA Signing, ECC Public Key, ECC Signing
 
 Dependencies: pyCrypto - https://github.com/dlitz/pycrypto
+              PyECC - https://github.com/rtyler/PyECC
 
 
 Python Cryptography Wrapper based on pyCrypto
@@ -36,7 +37,7 @@ import base64
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
 from Crypto.Hash import SHA256
-
+from pyecc import ECC
 
 class CryptoWrapper():
 
@@ -132,7 +133,37 @@ class CryptoWrapper():
         digest = SHA256.new(data).digest()
         return publicKey.verify(digest, signature)
 
-            
+    def eccGenerate(self):
+        '''Generates Elliptic Curve Public/Private Keys'''
+        ecc = ECC.generate()
+        publicKey = ecc._public
+        privateKey = ecc._private
+        curve = ecc._curve
+        return publicKey, privateKey, curve    
+    
+    def eccEncrypt(self,publicKey, curve, data):
+        '''Encrypts Data with ECC using public key'''
+        ecc = ECC(1, public=publicKey, private='', curve=curve)
+        encrypted = ecc.encrypt(data)
+        return encrypted
+    
+    def eccDecrypt(self,privateKey, curve, data):
+        '''Decrypts Data with ECC private key'''
+        ecc = ECC(1, public='', private=privateKey, curve=curve)
+        decrypted = ecc.decrypt(data)
+        return decrypted
+    
+    def eccSign(self, privateKey, curve, data):
+        '''ECC Signing - Returns an ECC Signature'''
+        ecc = ECC(1, public='', private=privateKey, curve=curve)
+        signature = ecc.sign(data)
+        return signature
+        
+    def eccVerify(self, publicKey, curve, data, signature):
+        '''Verifies ECC Signature based on Data received - Returns a Boolean Value'''
+        ecc = ECC(1, public=publicKey, private='', curve=curve)
+        return ecc.verify(data, signature)
+        
 if __name__ == '__main__':
     '''Usage Examples'''
     
@@ -140,10 +171,10 @@ if __name__ == '__main__':
 
             Python Crypto Wrapper - By Chase Schultz
             
-            Currently Supports: AES-256, RSA Public Key, RSA Signing
+            Currently Supports: AES-256, RSA Public Key, RSA Signing, ECC Public Key, ECC Signing
             
             Dependencies: pyCrypto - https://github.com/dlitz/pycrypto
-            
+                          PyECC - https://github.com/rtyler/PyECC
             
             '''
       
@@ -163,17 +194,36 @@ if __name__ == '__main__':
 
     '''RSA ENCRYPTION USAGE'''
     privateKey, publicKey = crypto.generateRSAKeys(2048)
+    
     encryptedRSAContent = crypto.rsaPublicEncrypt(publicKey, message)
-    print 'Encrypted RSA Message with Public Key: %s\n' % encryptedRSAContent
+    print 'Encrypted RSA Message with RSA Public Key: %s\n' % encryptedRSAContent
     decryptedRSAMessage = crypto.rsaPrivateDecrypt(privateKey, encryptedRSAContent)
-    print '\nDecrypted RSA Content with Private Key: %s\n' %  decryptedRSAMessage
+    print '\nDecrypted RSA Content with RSA Private Key: %s\n' %  decryptedRSAMessage
     
     
     '''RSA SIGNING USAGE'''
     signature = crypto.rsaSign(privateKey, message)
     print 'Signature for message is: %s\n ' % signature
     if crypto.rsaVerify(publicKey, message, signature) is False:
-        print 'Could not Verify Message' 
+        print 'Could not Verify Message\n' 
     else:
-        print 'Verified Content'
+        print 'Verified RSA Content\n'
+        
+    '''ECC ENCRYPTION USAGE'''
+    eccPublicKey, eccPrivateKey, eccCurve = crypto.eccGenerate()
+    
+    encryptedECCContent = crypto.eccEncrypt(eccPublicKey, eccCurve , message)
+    print 'Encrypted ECC Message with ECC Public Key: %s\n' % encryptedECCContent
+    decryptedECCContent = crypto.eccDecrypt(eccPrivateKey, eccCurve, encryptedECCContent)
+    print 'Decrypted ECC Content with ECC Private: %s\n' % decryptedECCContent
+    
+    '''ECC SIGNING USAGE'''
+    signature = crypto.eccSign(eccPrivateKey, eccCurve, message)
+    print 'Signature for message is: %s\n ' % signature
+    if crypto.eccVerify(eccPublicKey, eccCurve, message, signature) is False:
+        print 'Could not Verify Message\n' 
+    else:
+        print 'Verified ECC Content\n'
+    
+    
     
