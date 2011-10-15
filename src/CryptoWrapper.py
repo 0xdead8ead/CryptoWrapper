@@ -30,7 +30,7 @@ Python Cryptography Wrapper based on pyCrypto
 '''
 
 __author__ = 'Chase Schultz'
-__version__ = '0.2'
+__version__ = '0.1'
 
 import os
 import base64
@@ -139,7 +139,7 @@ class CryptoWrapper():
         publicKey = ecc._public
         privateKey = ecc._private
         curve = ecc._curve
-        return publicKey, privateKey, curve    
+        return privateKey, publicKey, curve    
     
     def eccEncrypt(self,publicKey, curve, data):
         '''Encrypts Data with ECC using public key'''
@@ -210,7 +210,7 @@ if __name__ == '__main__':
         print 'Verified RSA Content\n'
         
     '''ECC ENCRYPTION USAGE'''
-    eccPublicKey, eccPrivateKey, eccCurve = crypto.eccGenerate()
+    eccPrivateKey, eccPublicKey, eccCurve = crypto.eccGenerate()
     
     encryptedECCContent = crypto.eccEncrypt(eccPublicKey, eccCurve , message)
     print 'Encrypted ECC Message with ECC Public Key: %s\n' % encryptedECCContent
